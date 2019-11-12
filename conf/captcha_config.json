@@ -1,0 +1,9 @@
+{
+  "root_dir": "sample/origin/",
+  "image_suffix": "jpg",
+  "characters": "0123456789",
+  "count": 800,
+  "char_count": 4,
+  "width": 60,
+  "height": 25
+}
