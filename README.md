@@ -1,4 +1,4 @@
-#OARemainder
+#OARemainder[local]
 ##
 
 感谢**dee1024**的[***pytorch-captcha-recognition***](https://github.com/dee1024/pytorch-captcha-recognition.git)项目。
