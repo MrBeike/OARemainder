@@ -25,11 +25,4 @@ def main():
         c3 = captcha_setting.ALL_CHAR_SET[np.argmax(predict_label[0, 3 * captcha_setting.ALL_CHAR_SET_LEN:4 * captcha_setting.ALL_CHAR_SET_LEN].data.numpy())]
 
         c = '%s%s%s%s' % (c0, c1, c2, c3)
-        print(c)
     return c
-
-
-# if __name__ == '__main__':
-#     main()
-
-
