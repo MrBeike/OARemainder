@@ -15,4 +15,4 @@ IMAGE_WIDTH = 60
 
 TRAIN_DATASET_PATH = 'dataset' + os.path.sep + 'train'
 TEST_DATASET_PATH = 'dataset' + os.path.sep + 'test'
-PREDICT_DATASET_PATH = 'captcha.jpg'
+PREDICT_DATASET_PATH = './captcha'

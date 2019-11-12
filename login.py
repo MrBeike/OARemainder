@@ -5,7 +5,38 @@ import requests
 from requests.cookies import RequestsCookieJar
 import time
 from bs4 import BeautifulSoup
-import recognize_local as recognize
+import numpy as np
+import torch
+from torch.autograd import Variable
+import captcha_setting
+import my_dataset
+from captcha_cnn_model import CNN
+
+def main():
+    cnn = CNN()
+    cnn.eval()
+    cnn.load_state_dict(torch.load('model.pkl'))
+    print("load cnn net.")
+
+    predict_dataloader = my_dataset.get_predict_data_loader()
+
+    for i, (images, labels) in enumerate(predict_dataloader):
+        image = images
+        vimage = Variable(image)
+        predict_label = cnn(vimage)
+
+        c0 = captcha_setting.ALL_CHAR_SET[np.argmax(predict_label[0, 0:captcha_setting.ALL_CHAR_SET_LEN].data.numpy())]
+        c1 = captcha_setting.ALL_CHAR_SET[np.argmax(predict_label[0, captcha_setting.ALL_CHAR_SET_LEN:2 * captcha_setting.ALL_CHAR_SET_LEN].data.numpy())]
+        c2 = captcha_setting.ALL_CHAR_SET[np.argmax(predict_label[0, 2 * captcha_setting.ALL_CHAR_SET_LEN:3 * captcha_setting.ALL_CHAR_SET_LEN].data.numpy())]
+        c3 = captcha_setting.ALL_CHAR_SET[np.argmax(predict_label[0, 3 * captcha_setting.ALL_CHAR_SET_LEN:4 * captcha_setting.ALL_CHAR_SET_LEN].data.numpy())]
+
+        c = '%s%s%s%s' % (c0, c1, c2, c3)
+        print(c)
+    return c
+
+
+
+
 
 # 登录参数准备
 loginUrl = 'http://59.203.198.99:8081/uc-server/login'
@@ -43,7 +74,7 @@ def dataMaker(s):
     # imgUrl = 'http://59.203.198.99:8081/uc-server/imageServlet?now=%d' % (time.time() * 1000)
     # imgcodeContent = s.get(imgUrl).content
     # captchaDownload(imgcodeContent)
-    imgcode = recognize.main()
+    imgcode = main()
     print(imgcode)
     # 表单内容
     # datas = {

@@ -26,8 +26,10 @@ def main():
 
         c = '%s%s%s%s' % (c0, c1, c2, c3)
         print(c)
+    return c
 
-if __name__ == '__main__':
-    main()
+
+# if __name__ == '__main__':
+#     main()
 
 
