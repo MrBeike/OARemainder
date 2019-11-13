@@ -11,10 +11,9 @@ from captcha_predict import main
 
 class OARemainder:
     def __init__(self):
-        self.configPath = 'captcha/config.ini'
+        self.configPath = 'config.ini'
         self.captchaPath = 'captcha/0000_00000000.jpg'
         # 登录参数准备
-        self.loginUrl = 'http://59.203.198.99:8081/uc-server/login'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 SE 2.X MetaSr 1.0',
             'Accept-Encoding': 'gzip, deflate, sdch',
@@ -26,7 +25,9 @@ class OARemainder:
             'http': '127.0.0.1:8888',
             'https': '127.0.0.1:8888',
         }
-        self.s = requests.session(headers=self.headers)
+        self.s = requests.session()
+        self.s.headers = self.headers
+        self.config()
 
     # 读取用户配置信息
     def config(self):
@@ -37,11 +38,15 @@ class OARemainder:
         # -get(section,option)得到section中option的值，返回为string类型
         self.username = config.get('userInfo', 'username')
         self.password = config.get('userInfo', 'password')
+        self.loginUrl = config.get('web', 'loginUrl')
+        # self.imgUrl = config.get('web', 'imgUrl')
+        self.govRecvUrl = config.get('web','govRecvUrl')
+        self.govConfUrl = config.get('web','govConfUrl')
         return
 
     # 将验证码写入文件
     def captchaDownload(self, data):
-        with open(self.capthchaPath, 'wb') as fp:
+        with open(self.captchaPath, 'wb') as fp:
             fp.write(data)
         return
 
@@ -51,9 +56,7 @@ class OARemainder:
         page = s.get(self.loginUrl)
         manual_cookies = RequestsCookieJar()
         manual_cookies.set('loginType', 'normal')
-        print(page.status_code, s.cookies)
         s.cookies.update(manual_cookies)
-        print(s.cookies)
         response = page.content
         soup = BeautifulSoup(response, "html.parser")
         lt = soup.find(name="input", attrs={"name": 'lt'}).get("value")
@@ -63,6 +66,7 @@ class OARemainder:
         self.captchaDownload(imgcodeContent)
         while True:
             imgcode = main()
+            print(imgcode)
             if len(str(imgcode)) == 4:
                 break
             # 表单内容
@@ -78,10 +82,13 @@ class OARemainder:
         return datas
 
     def login(self):
+        ucenter = 'http://uc.chizhou.gov.cn/'
         s = self.s
         datas = self.dataMaker()
-        response = s.post(self.loginUrl, datas=datas).content
-
-
+        response = s.post(self.loginUrl, data=datas).content.decode('utf-8')
+        print(response)
+        govRecvPage = s.get(ucenter).content.decode('utf-8')
+        print(govRecvPage)
 if __name__ == '__main__':
     oa = OARemainder()
+    oa.login()
