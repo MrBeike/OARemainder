@@ -22,8 +22,8 @@ class OARemainder:
 
     def login(self):
         '''
-        登陆OA收文系统。（TODO账户密码读取？写入配置文件？判断是否存在？）
-        :param ：（TODO）
+        登陆OA收文系统。#TODO 账户密码读取？写入配置文件？判断是否存在？
+        :param ：
         :return login_statue: 登陆状态 bool
         '''
         s = self.s
@@ -37,7 +37,7 @@ class OARemainder:
         }
         login_url = 'http://59.203.198.93/defaultroot/Logon!logon.action'
         login_response = s.post(login_url, data=login_data)
-        if login_response.status_code == 200 & login_response.content.decode('utf-8') == 'something':  # TODO
+        if login_response.status_code == 200 & login_response.content.decode('utf-8') == 'something':  # TODO 判断条件
             login_statue = True
         return login_statue
 
