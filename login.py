@@ -27,6 +27,7 @@ class OARemainder:
         }
         self.s = requests.session()
         self.s.headers = self.headers
+        self.s.proxies = self.proxies
         self.config()
 
     # 读取用户配置信息
@@ -40,8 +41,8 @@ class OARemainder:
         self.password = config.get('userInfo', 'password')
         self.loginUrl = config.get('web', 'loginUrl')
         # self.imgUrl = config.get('web', 'imgUrl')
-        self.govRecvUrl = config.get('web','govRecvUrl')
-        self.govConfUrl = config.get('web','govConfUrl')
+        self.govRecvUrl = config.get('web', 'govRecvUrl')
+        self.govConfUrl = config.get('web', 'govConfUrl')
         return
 
     # 将验证码写入文件
@@ -54,6 +55,7 @@ class OARemainder:
     def dataMaker(self):
         s = self.s
         page = s.get(self.loginUrl)
+        self.jessionId = s.cookies.items()[0][1]
         manual_cookies = RequestsCookieJar()
         manual_cookies.set('loginType', 'normal')
         s.cookies.update(manual_cookies)
@@ -70,7 +72,7 @@ class OARemainder:
             if len(str(imgcode)) == 4:
                 break
             # 表单内容
-        datas = {
+        data = {
             'lt': lt,
             'execution': execution,
             '_eventId': 'submit',
@@ -79,16 +81,42 @@ class OARemainder:
             'password': self.password,
             'random': imgcode
         }
-        return datas
+        return data
 
     def login(self):
-        ucenter = 'http://uc.chizhou.gov.cn/'
+        '''
+        登陆模块：
+        1.登陆政务通系统，通过session保存登陆状态。（TODO判断登陆是否成功）
+        2.点击OA收文系统按钮，获取进一步登陆所需信息。（oaUrl）
+        '''
         s = self.s
-        datas = self.dataMaker()
-        response = s.post(self.loginUrl, data=datas).content.decode('utf-8')
-        print(response)
-        govRecvPage = s.get(ucenter).content.decode('utf-8')
-        print(govRecvPage)
+        # 1.登陆政务通系统
+        zwtData = self.dataMaker()
+        zwtPage = s.post(self.loginUrl, data=zwtData).content.decode('utf-8')
+        print(zwtPage)
+        # 2.点击OA收文系统按钮。
+        oaPage = s.get('http://59.203.198.93/defaultroot/login.jsp?type=swbl').content.decode('utf-8')
+        oaPageSoup = BeautifulSoup(oaPage, 'html.parser')
+        domainAccount = oaPageSoup.find(name="input", attrs={"name": 'domainAccount'}).get("value")
+        userAccount = oaPageSoup.find(name="input", attrs={"name": 'userAccount'}).get("value")
+        userPassword = oaPageSoup.find(name="input", attrs={"name": 'userPassword'}).get("value")
+        type = oaPageSoup.find(name="input", attrs={"name": 'type'}).get("value")
+        localeCode = oaPageSoup.find(name="input", attrs={"name": 'localeCode'}).get("value")
+        pkexit = oaPageSoup.find(name="input", attrs={"name": 'pkexit'}).get("value")
+        oaData = {
+            'domainAccount': domainAccount,
+            'userAccount': userAccount,
+            'userPassword': userPassword,
+            'type': type,
+            'localeCode': localeCode,
+            'pkexit': pkexit
+        }
+        #3.登陆OA系统，
+
+
+
+
+
 if __name__ == '__main__':
     oa = OARemainder()
     oa.login()
