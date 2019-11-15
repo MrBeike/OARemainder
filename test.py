@@ -1,6 +1,11 @@
 import requests
 import demjson
 
+'''
+OARemainder:OA收文系统提醒及收文工具。
+#工作流程：登陆--获取收文信息(自动巡检)-'-'-'-发现未读信息--自动下载(正文+附件)--关键词检测--通知用户(收文数量+文件名+关键词命中情况)
+#编码计划：1.完成收文自动检测+简单提醒(数量+文件名)
+'''
 
 class OARemainder:
     def __init__(self):
@@ -39,27 +44,32 @@ class OARemainder:
         :param type: 收文类别。
         :return: json 收文所有信息（包括正文名称、下载地址、附件等信息）
         '''
-        s = self.s
-        docSet_url = {'myRecv': 'http://59.203.198.93/defaultroot/GovRecvDocSet!notReadData.action',
-                      'confRecv': 'http://59.203.198.93/defaultroot/GovConfRecvDoc!notReadData.action'
-                      }
-        docSet_data = {
-            'tag': 'notRead',
-            'queryTitle': '',
-            'queryOrg': '',
-            'queryNumber': '',
-            'queryBeginDate': '',
-            'queryEndDate': '',
-            'pageSize': '15',
-            'orderByFieldName': '',
-            'orderByType': '',
-            'startPage': 1,
-            'pageCount': '1',
-            'recordCount': '0'
-        }
-        docSet_response = s.post(docSet_url[type], data=docSet_data).content.decode('utf-8')
-        json = demjson.decode(docSet_response)
-        return json
+        while True:
+            s = self.s
+            docSet_url = {'myRecv': 'http://59.203.198.93/defaultroot/GovRecvDocSet!notReadData.action',
+                          'confRecv': 'http://59.203.198.93/defaultroot/GovConfRecvDoc!notReadData.action'
+                          }
+            docSet_data = {
+                'tag': 'notRead',
+                'queryTitle': '',
+                'queryOrg': '',
+                'queryNumber': '',
+                'queryBeginDate': '',
+                'queryEndDate': '',
+                'pageSize': '15',
+                'orderByFieldName': '',
+                'orderByType': '',
+                'startPage': 1,
+                'pageCount': '1',
+                'recordCount': '0'
+            }
+            docSet_response = s.post(docSet_url[type], data=docSet_data).content.decode('utf-8')
+            json = demjson.decode(docSet_response)
+            if json['result'] == 'success':
+                json_data = json['data']
+                break
+        return json_data
+
 
     def docDownload(self, json):
         '''
@@ -68,4 +78,22 @@ class OARemainder:
         :return:
         '''
         s = self.s
-       
+        download_data = {
+            'verifyCode': doc_info['verifyCode1'],
+            'FileName': doc_info['goldGridId'] + doc_info['gdocumentWordType'],
+            'name': doc_info['documentSendFileTitle'] + doc_info['documentWordType'],
+            'path': 'govdocumentmanager'
+        }
+
+    def notify(self, json):
+        '''
+        解析json数据，获取信息系数量record,
+        :param json: 获取的json['data']数据
+        :return: docSet_info  dict
+        '''
+        record = json['pager']['recordCount']
+        if record == 0:
+            msg = '无未读收文'
+        else:
+            msg = '未读收文{}封'.format(record)
+        return msg
