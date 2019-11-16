@@ -1,7 +1,9 @@
 #OARemainder[local]
-##
 
-感谢**dee1024**的[***pytorch-captcha-recognition***](https://github.com/dee1024/pytorch-captcha-recognition.git)项目。
-本项目的验证码识别及调用均来源于此项目。
 ##功能实现
 本项目主要通过爬虫实现“政务通”系统中OA公文收文提醒，省去人工定时刷新的痛苦。
+- 1.获取未读收文信息。
+- 2.下载正文及附件文件。
+- 3.打开文件进行关键词搜索。
+- 4.记录收文、文件、关键词命中等信息到数据库。
+- 5.提供数据库查询及信息提醒功能。

@@ -163,7 +163,7 @@ class OARemainder:
 
     #TODO 是遍历文件夹 还是在docDownload功能中保存已下载文件信息，读取操作。
     def docSearch(self):
-        for file in
+
         return
 
     #TODO 通知内容{通知名称，正文是否命中关键词，附件是否命中关键词（如果有），提供文件夹连接}
