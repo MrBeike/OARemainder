@@ -1,7 +1,14 @@
-import requests
+# -*- coidng:utf-8 -*-
+
+import os
+import re
+
 import demjson
-import re,os
+import requests
+import win32com.client as wc
 from bs4 import BeautifulSoup
+from docx import Document
+
 
 '''
 OARemainder:OA收文系统提醒及收文工具。
@@ -23,7 +30,6 @@ class OARemainder:
         self.working_path = os.getcwd()
         self.download_folder = '通知文件下载'
 
-
     def login(self):
         '''
         登陆OA收文系统。#TODO 账户密码读取？写入配置文件？判断是否存在？
@@ -41,7 +47,7 @@ class OARemainder:
         }
         login_url = 'http://59.203.198.93/defaultroot/Logon!logon.action'
         login_response = s.post(login_url, data=login_data)
-        if login_response.status_code == 200 :  # TODO 判断条件 & login_response.content.decode('utf-8') == 'something'
+        if login_response.status_code == 200:  # TODO 判断条件 & login_response.content.decode('utf-8') == 'something'
             login_statue = True
         return login_statue
 
@@ -153,20 +159,44 @@ class OARemainder:
             download_set = download_sets[i]
             if not os.path.exists(self.download_folder):
                 os.mkdir(self.download_folder)
-            download_path = os.path.join(self.working_path,self.download_folder, download_set[-1]['download_name'].split('.')[0])
+            download_path = os.path.join(self.working_path, self.download_folder,
+                                         download_set[-1]['download_name'].split('.')[0])
             for j in range(len(download_set)):
                 download_dict = download_set[j]
                 download_response = s.get(download_dict['download_url']).content
-                with open(download_path+download_dict['download_name'],'wb') as download_file:
+                with open(download_path + download_dict['download_name'], 'wb') as download_file:
                     download_file.write(download_response)
         return
 
-    #TODO 是遍历文件夹 还是在docDownload功能中保存已下载文件信息，读取操作。
-    def docSearch(self):
+    # TODO 是遍历文件夹 还是在docDownload功能中保存已下载文件信息，读取操作。
+    def docSearch(self, filename, keyword):
+        #TODO 读取db文件获取信息，进行转换+打开+搜索
+        #TODO 软件是否安装影响本部分程序功能，Try...还是有软件要求。
+        #doc文件另存为docx
+        word = wc.Dispatch("Word.Application")
+        # wps文件另存为docx
+        wps = wc.Dispatch('wps.application')
+        kwps = wc.Dispatch('kwps.application')
+        doc = word.Documents.Open(filename)
+        # 上面的地方只能使用完整绝对地址，相对地址找不到文件，且，只能用“\\”，不能用“/”，哪怕加了 r 也不行，涉及到将反斜杠看成转义字符。
+        doc.SaveAs(r"", 12)
+        # 注意SaveAs会打开保存后的文件，有时可能看不到，但后台一定是打开的
+        doc.Close
+        word.Quit
+        #2.打开文档
+        document = Document(filename)
+        # 读取每段内容
+        lines = [paragraph.text for paragraph in document.paragraphs]
+        # 输出并观察结果[-1表示未找到]
+        for line in lines:
+            text = line.strip()
+            if text.find(keyword) != -1:
+                flag = True
+                break
+            else:
+                flag = False
 
-        return
-
-    #TODO 通知内容{通知名称，正文是否命中关键词，附件是否命中关键词（如果有），提供文件夹连接}
+    # TODO 通知内容{通知名称，正文是否命中关键词，附件是否命中关键词（如果有），提供文件夹连接}
     def notify(self, json):
         '''
         解析json数据，获取信息系数量record,
@@ -180,7 +210,7 @@ class OARemainder:
             msg = '未读收文{}封'.format(record)
         return msg
 
-    #TODO 是否能通过ftp检索文件名直接下载文件
+    # TODO 是否能通过ftp检索文件名直接下载文件
     def ftp(self):
         '''
         <!--<object classid="clsid:A7EE3B4B-DB6C-4957-A904-DD7EA2BB3DCB"
@@ -196,7 +226,6 @@ class OARemainder:
 
         '''
         return
-
 
 
 oa = OARemainder()
