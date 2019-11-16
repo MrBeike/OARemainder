@@ -1,6 +1,6 @@
 import requests
 import demjson
-import re
+import re,os
 from bs4 import BeautifulSoup
 
 '''
@@ -19,6 +19,10 @@ class OARemainder:
             # 'Host': '59.203.198.99:8081',
             # 'Referer': 'http://59.203.198.99:8081/uc-server/login'
         }
+        self.login()
+        self.working_path = os.getcwd()
+        self.download_folder = '通知文件下载'
+
 
     def login(self):
         '''
@@ -37,7 +41,7 @@ class OARemainder:
         }
         login_url = 'http://59.203.198.93/defaultroot/Logon!logon.action'
         login_response = s.post(login_url, data=login_data)
-        if login_response.status_code == 200 & login_response.content.decode('utf-8') == 'something':  # TODO 判断条件
+        if login_response.status_code == 200 :  # TODO 判断条件 & login_response.content.decode('utf-8') == 'something'
             login_statue = True
         return login_statue
 
@@ -71,6 +75,7 @@ class OARemainder:
             if json['result'] == 'success':
                 json_data = json['data']
                 break
+        print(json_data)
         return json_data
 
     def jsonParser(self, json):
@@ -117,7 +122,7 @@ class OARemainder:
             # 2.获取正文下载信息
             download_data = {
                 'verifyCode': doc_info['verifyCode1'],
-                'FileName': doc_info['goldGridId'] + doc_info['gdocumentWordType'],
+                'FileName': doc_info['goldGridId'] + doc_info['documentWordType'],
                 'name': doc_info['documentSendFileTitle'] + doc_info['documentWordType'],
                 'path': 'govdocumentmanager'
             }
@@ -134,6 +139,7 @@ class OARemainder:
             }
             download_set.append(doc_download_set)
         download_sets.append(download_set)
+        print(download_sets)
         return download_sets
 
     def docDownload(self, download_sets):
@@ -143,19 +149,22 @@ class OARemainder:
         :return :
         '''
         s = self.s
-        for i range(len(download_sets)):
+        for i in range(len(download_sets)):
             download_set = download_sets[i]
+            if not os.path.exists(self.download_folder):
+                os.mkdir(self.download_folder)
+            download_path = os.path.join(self.working_path,self.download_folder, download_set[-1]['download_name'].split('.')[0])
             for j in range(len(download_set)):
-                #TODO 是否需要设置每个文件的单独文件夹，方便后续查看管理
-                download_folder = '通知文件下载/'
-                download_path = download_folder+download_set[-1]['download_name'].split('.')[0]+'/'
-                download_response = s.get(download_set['download_url']).content
-                with open(download_path+download_set['download_name'],'wb') as download_file:
+                download_dict = download_set[j]
+                download_response = s.get(download_dict['download_url']).content
+                with open(download_path+download_dict['download_name'],'wb') as download_file:
                     download_file.write(download_response)
         return
 
     #TODO 是遍历文件夹 还是在docDownload功能中保存已下载文件信息，读取操作。
     def docSearch(self):
+        for file in
+        return
 
     #TODO 通知内容{通知名称，正文是否命中关键词，附件是否命中关键词（如果有），提供文件夹连接}
     def notify(self, json):
@@ -187,3 +196,10 @@ class OARemainder:
 
         '''
         return
+
+
+
+oa = OARemainder()
+json = oa.docSet('myRecv')
+download_set = oa.jsonParser(json)
+oa.docDownload(download_set)
