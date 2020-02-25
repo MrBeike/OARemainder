@@ -33,6 +33,21 @@ class OARemainder:
         self.download_folder = 'download'
 
     # def configReader(self):
+    #     '''
+    #     读取
+    #     '''
+    #     #  实例化configParser对象
+    #     config = configparser.ConfigParser()
+    #     # -read读取ini文件
+    #     config.read(self.configPath, encoding='utf-8')
+    #     # -get(section,option)得到section中option的值，返回为string类型
+    #     self.username = config.get('userInfo', 'username')
+    #     self.password = config.get('userInfo', 'password')
+    #     self.loginUrl = config.get('web', 'loginUrl')
+    #     # self.imgUrl = config.get('web', 'imgUrl')
+    #     self.govRecvUrl = config.get('web', 'govRecvUrl')
+    #     self.govConfUrl = config.get('web', 'govConfUrl')
+    #     return
 
 
     def login(self):
