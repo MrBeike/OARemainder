@@ -65,3 +65,8 @@
 # user_read_data = 'select * from user'
 # userSQL = {'db_name': 'userinfo.db', 'create_table': user_create, 'add_data': user_add_data,
 #            'read_data': user_read_data}
+import hashlib
+pw ='050094'
+print(hashlib.md5(pw.encode(encoding='utf-8')).hexdigest().upper())
+
+# http://59.203.198.22:8086/defaultroot/public/download/download.jsp?FileName=2020022419504463978337936.xlsx&verifyCode=F35DDE0D55FileName00&name=青阳县应对新冠肺炎疫情支持中小微企业责任清单.xlsx&path=govdocumentmanager

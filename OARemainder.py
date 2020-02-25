@@ -5,10 +5,11 @@ import re
 
 import hashlib
 import demjson
+import configparser
 import requests
-import win32com.client as wc
+# import win32com.client as wc
 from bs4 import BeautifulSoup
-from docx import Document
+# from docx import Document
 
 
 '''
@@ -30,7 +31,9 @@ class OARemainder:
         self.login()
         self.working_path = os.getcwd()
         self.download_folder = 'download'
-        userpassword =hashlib.md5(password.encode(encoding='utf-8')).hexdigest().upper()
+
+    # def configReader(self):
+
 
     def login(self):
         '''
@@ -39,10 +42,13 @@ class OARemainder:
         :return login_statue: 登陆状态 bool
         '''
         s = self.s
+        # username = self.username
+        # password = self.password
+        # userpassword =hashlib.md5(password.encode(encoding='utf-8')).hexdigest().upper()
         login_data = {
             'domainAccount': 'whir',
-            'userAccount': useraccount,
-            'userPassword': userpassword,
+            'userAccount': '370705',
+            'userPassword': 'AD3063E152DA7ADD01DA30FEDDE3013F',
             'type': 'swbl',
             'localeCode': 'zh_CN',
             'pkexit': '1',
@@ -121,10 +127,10 @@ class OARemainder:
                 for i in range(len(accessory_download_info)):
                     accessory_download_url = accessory_download_info[i].get('href')
                     accessory_download_name = accessory_download_info[i].get_text().strip()
-                accessory_download_set = {
-                    'download_url': accessory_download_url,
-                    'download_name': accessory_download_name
-                }
+                    accessory_download_set = {
+                        'download_url': accessory_download_url,
+                        'download_name': accessory_download_name
+                    }
                 download_set.append(accessory_download_set)
 
             # 2.获取正文下载信息
@@ -146,7 +152,7 @@ class OARemainder:
                 'download_name': doc_download_name
             }
             download_set.append(doc_download_set)
-        download_sets.append(download_set)
+            download_sets.append(download_set)
         print(download_sets)
         return download_sets
 
@@ -233,4 +239,4 @@ class OARemainder:
 oa = OARemainder()
 json = oa.docSet('myRecv')
 download_set = oa.jsonParser(json)
-oa.docDownload(download_set)
+# oa.docDownload(download_set)
