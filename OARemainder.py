@@ -3,6 +3,7 @@
 import os
 import re
 
+import hashlib
 import demjson
 import requests
 import win32com.client as wc
@@ -28,7 +29,8 @@ class OARemainder:
         }
         self.login()
         self.working_path = os.getcwd()
-        self.download_folder = '通知文件下载'
+        self.download_folder = 'download'
+        userpassword =hashlib.md5(password.encode(encoding='utf-8')).hexdigest().upper()
 
     def login(self):
         '''
@@ -39,8 +41,8 @@ class OARemainder:
         s = self.s
         login_data = {
             'domainAccount': 'whir',
-            'userAccount': '370705',
-            'userPassword': 'AD3063E152DA7ADD01DA30FEDDE3013F',
+            'userAccount': useraccount,
+            'userPassword': userpassword,
             'type': 'swbl',
             'localeCode': 'zh_CN',
             'pkexit': '1',
